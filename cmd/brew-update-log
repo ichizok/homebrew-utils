@@ -1,0 +1,29 @@
+#!/bin/bash
+#:  * `update-log`
+#:
+#:  Update with logging, and send a notification when found outdated formulae.
+
+# HOMEBREW_PREFIX is set in bin/brew
+# shellcheck disable=SC2154
+set -eu
+
+if ! [[ -t 1 ]]
+then
+  cat <<EOT
+
+#
+# $(date)
+#
+
+EOT
+fi
+
+"${HOMEBREW_BREW_FILE}" update
+
+declare -r TERMINAL_NOTIFIER="${HOMEBREW_PREFIX}/bin/terminal-notifier"
+declare -r APP_ID=com.apple.Terminal
+
+if [[ -x "${TERMINAL_NOTIFIER}" ]] && [[ -n "$("${HOMEBREW_BREW_FILE}" outdated --quiet)" ]]
+then
+  "${TERMINAL_NOTIFIER}" -title Homebrew -message "Found outdated formulae" -sender "${APP_ID}"
+fi

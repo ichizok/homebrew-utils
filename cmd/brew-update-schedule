@@ -1,0 +1,111 @@
+#!/bin/bash
+#:  * `update-schedule` [<schedule>|stop]
+#:
+#:  Register `brew update-log` scheduler. `<schedule>` must be describe as cron format.
+
+# HOMEBREW_PREFIX is set in bin/brew
+# shellcheck disable=SC2154
+set -eu
+
+declare -r TAP_REPOSITORY=ichizok/homebrew-utils
+declare -r TAP_DIRECTORY=${HOMEBREW_LIBRARY}/Taps/${TAP_REPOSITORY}
+
+declare -r FORMULA_NAME=brew-update-scheduler
+declare -r FORMULA_FILE=${TAP_DIRECTORY}/Formula/${FORMULA_NAME}.rb
+declare -r FORMULA=${TAP_REPOSITORY/homebrew-/}/${FORMULA_NAME}
+
+if [[ "$1" = stop ]]
+then
+  "${HOMEBREW_BREW_FILE}" services stop "${FORMULA}"
+  exit 0
+fi
+
+declare -r UPDATE_SCHEDULE=${1:-"0 0 * * *"}
+
+onoe() {
+  # Check whether stderr is a tty.
+  if [[ -n "${HOMEBREW_COLOR}" || (-t 2 && -z "${HOMEBREW_NO_COLOR}") ]]
+  then
+    echo -ne "\\033[4;31mError\\033[0m: " >&2 # highlight Error with underline and red color
+  else
+    echo -n "Error: " >&2
+  fi
+  if [[ $# -eq 0 ]]
+  then
+    cat >&2
+  else
+    echo "$*" >&2
+  fi
+}
+
+odie() {
+  onoe "$@"
+  exit 1
+}
+
+validate_format() {
+  local fields
+  read -r -a fields <<<"${UPDATE_SCHEDULE}"
+  [[ "${#fields[@]}" -eq 5 ]] || return 1
+
+  local i value values
+  for i in {0..4}
+  do
+    read -r -a values <<<"${fields[$i]/,/ }"
+    for value in "${values[@]}"
+    do
+      if [[ "${value}" =~ ^(\*|[[:digit:]]+|[[:digit:]]+-[[:digit:]]+)$ ]]
+      then
+        continue
+      fi
+      if [[ $i -eq 4 ]] && [[ "${value}" =~ ^(sun|mon|tue|wed|thu|fri|sat)$ ]]
+      then
+        continue
+      fi
+      return 1
+    done
+  done
+}
+
+validate_format || odie "\"${UPDATE_SCHEDULE}\" don't follow cron format."
+
+cat <<EOT >"${FORMULA_FILE}"
+class BrewUpdateScheduler < Formula
+  desc "Brew-update scheduler"
+  url "https://github.com/${TAP_REPOSITORY}/raw/main/README.md"
+  sha256 "b3dec272d7e547b1bb3529d6299caae8661ebadfb08101946291a1fbbe391ecf"
+  version "1.0.0"
+
+  keg_only "provides only service"
+
+  depends_on "terminal-notifier"
+
+  def install
+    system "touch", prefix/"placeholder"
+  end
+
+  def caveats
+    <<~EOS
+      This formula provides only service, so you should run after installation:
+        brew services start #{name}
+
+      Default schedule is "0 0 * * *" by cron-format. If you want to change it:
+        export UPDATE_SCHEDULE="[cron-format]" brew install #{name}
+    EOS
+  end
+
+  service do
+    run [HOMEBREW_BREW_FILE, "update-log"]
+    run_at_load false
+    run_type :cron
+    cron "${UPDATE_SCHEDULE}"
+    log_path HOMEBREW_LOGS/"update.log"
+    error_log_path HOMEBREW_LOGS/"update.log"
+  end
+
+  test do; end
+end
+EOT
+
+"${HOMEBREW_BREW_FILE}" reinstall "${FORMULA}"
+"${HOMEBREW_BREW_FILE}" services restart "${FORMULA}"

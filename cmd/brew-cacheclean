@@ -1,0 +1,39 @@
+#!/bin/bash
+#:  * `cacheclean`
+#:
+#:  Remove all bottles and broken symlink files in cache directory.
+
+# HOMEBREW_CACHE is set in brew.sh
+# shellcheck disable=SC2154
+
+# These variables are set from the user environment.
+# shellcheck disable=SC2154
+set -e
+
+ohai() {
+  # Check whether stdout is a tty.
+  if [[ -n "${HOMEBREW_COLOR}" || (-t 1 && -z "${HOMEBREW_NO_COLOR}") ]]
+  then
+    echo -e "\\033[34m==>\\033[0m \\033[1m$*\\033[0m" # blue arrow and bold text
+  else
+    echo "==> $*"
+  fi
+}
+
+cd "${HOMEBREW_CACHE}"
+
+DOWNLOADS_SIZE="$(du -hs downloads | awk '{print$1}')"
+declare -r DOWNLOADS_SIZE
+
+echo "Downloads size: ${DOWNLOADS_SIZE}"
+
+if [[ "${DOWNLOADS_SIZE}" = 0B ]]
+then
+  ohai "No bottle."
+else
+  ohai "Removing bottles..."
+  rm downloads/*
+fi
+
+ohai "Removing broken symlink files..."
+find -L . Cask -maxdepth 1 -type l -exec rm -f '{}' +
