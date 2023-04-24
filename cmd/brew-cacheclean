@@ -1,7 +1,7 @@
 #!/bin/bash
 #:  * `cacheclean`
 #:
-#:  Remove all bottles and broken symlink files in cache directory.
+#:  Remove all cached downloads, and broken symlink files in cache directory.
 
 # HOMEBREW_CACHE is set in brew.sh
 # shellcheck disable=SC2154
@@ -29,9 +29,9 @@ echo "Downloads size: ${DOWNLOADS_SIZE}"
 
 if [[ "${DOWNLOADS_SIZE}" = 0B ]]
 then
-  ohai "No bottle."
+  ohai "No downloads."
 else
-  ohai "Removing bottles..."
+  ohai "Removing downloads..."
   rm downloads/*
 fi
 

@@ -1,7 +1,9 @@
 #!/bin/bash
 #:  * `update-schedule` [<schedule>|stop]
 #:
-#:  Register `brew update-log` scheduler. `<schedule>` must be describe as cron format.
+#:  Register `brew update-log` scheduler.
+#:
+#:  *Note:* `<schedule>` must be describe as cron format.
 
 # HOMEBREW_PREFIX is set in bin/brew
 # shellcheck disable=SC2154
@@ -73,7 +75,7 @@ cat <<EOT >"${FORMULA_FILE}"
 class BrewUpdateScheduler < Formula
   desc "Brew-update scheduler"
   url "https://github.com/${TAP_REPOSITORY}/raw/main/README.md"
-  sha256 "b3dec272d7e547b1bb3529d6299caae8661ebadfb08101946291a1fbbe391ecf"
+  sha256 "c8c40edbc278a694f5ad81c28cf54c6611210f9788dce25ff5a52e308f12e0be"
   version "1.0.0"
 
   keg_only "provides only service"
