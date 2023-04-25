@@ -88,11 +88,10 @@ class BrewUpdateScheduler < Formula
 
   def caveats
     <<~EOS
-      This formula provides only service, so you should run after installation:
-        brew services start #{name}
+      This formula provides only service for periodic \`brew update\`.
 
-      Default schedule is "0 0 * * *" by cron-format. If you want to change it:
-        export UPDATE_SCHEDULE="[cron-format]" brew install #{name}
+      You can manage the schedule through \`brew update-schedule\`:
+        brew update-schedule [<schedule>|stop]
     EOS
   end
 
