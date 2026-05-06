@@ -3,24 +3,16 @@
 #:
 #:  Remove all cached downloads, and broken symlink files in cache directory.
 
+# HOMEBREW_LIBRARY is set by bin/brew
 # HOMEBREW_CACHE is set in brew.sh
-# shellcheck disable=SC2154
 
 # These variables are set from the user environment.
-# shellcheck disable=SC2154
 set -e
 
-ohai() {
-  # Check whether stdout is a tty.
-  if [[ -n "${HOMEBREW_COLOR}" || (-t 1 && -z "${HOMEBREW_NO_COLOR}") ]]
-  then
-    echo -e "\\033[34m==>\\033[0m \\033[1m$*\\033[0m" # blue arrow and bold text
-  else
-    echo "==> $*"
-  fi
-}
+# shellcheck disable=SC1091
+source "${HOMEBREW_LIBRARY}/Homebrew/utils/helpers.sh"
 
-cd "${HOMEBREW_CACHE}"
+safe_cd "${HOMEBREW_CACHE}"
 
 DOWNLOADS_SIZE="$(du -hs downloads | awk '{print$1}')"
 declare -r DOWNLOADS_SIZE

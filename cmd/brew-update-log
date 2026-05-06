@@ -4,7 +4,6 @@
 #:  Update with logging, and send a notification when found outdated formulae.
 
 # HOMEBREW_PREFIX is set in bin/brew
-# shellcheck disable=SC2154
 set -eu
 
 if ! [[ -t 1 ]]
