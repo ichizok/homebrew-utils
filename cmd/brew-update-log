@@ -20,9 +20,8 @@ fi
 "${HOMEBREW_BREW_FILE}" update
 
 declare -r TERMINAL_NOTIFIER="${HOMEBREW_PREFIX}/bin/terminal-notifier"
-declare -r APP_ID=com.apple.Terminal
 
 if [[ -x "${TERMINAL_NOTIFIER}" ]] && [[ -n "$("${HOMEBREW_BREW_FILE}" outdated --quiet)" ]]
 then
-  "${TERMINAL_NOTIFIER}" -title Homebrew -message "Found outdated formulae" -sender "${APP_ID}"
+  "${TERMINAL_NOTIFIER}" -title Homebrew -message "Found outdated formulae"
 fi
