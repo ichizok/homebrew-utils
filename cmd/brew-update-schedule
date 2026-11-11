@@ -24,7 +24,7 @@ fi
 declare -r UPDATE_SCHEDULE=${1:-"0 0 * * *"}
 
 # shellcheck disable=SC1091
-source "${HOMEBREW_LIBRARY}/Homebrew/utils/helpers.sh"
+source "${HOMEBREW_LIBRARY}/Homebrew/utils.sh"
 
 validate_format() {
   local fields
